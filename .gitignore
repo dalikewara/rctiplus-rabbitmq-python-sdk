@@ -13,6 +13,8 @@ temp
 tmp
 rabbitmq_volume/data
 rabbitmq_volume/log
+build
+*.egg-info
 
 
 # Node artifact files
