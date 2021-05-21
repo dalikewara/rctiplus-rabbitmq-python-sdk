@@ -1,5 +1,5 @@
 import json
-from rabbitmq import RabbitMQ, MessagePayload
+from rctiplus_rabbitmq_python_sdk import RabbitMQ, MessagePayload
 
 # Create payload class handler that implement `MessagePayload`
 class JSONPayload(MessagePayload):

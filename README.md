@@ -29,7 +29,7 @@ First, you need to create a payload class handler that implement `MessagePayload
 
 ```python
 import json
-from rctiplus_rabbitmq_python_sdk.rabbitmq import MessagePayload
+from rctiplus_rabbitmq_python_sdk import MessagePayload
 
 class JSONPayload(MessagePayload):
     """Example class to handle JSON payload
@@ -94,7 +94,7 @@ class MessagePayload:
 Making connection to RabbitMQ server can be done by doing this simple way:
 
 ```python
-from rctiplus_rabbitmq_python_sdk.rabbitmq import RabbitMQ
+from rctiplus_rabbitmq_python_sdk import RabbitMQ
 
 conn = RabbitMQ()
 conn.connect(host='localhost', port=5672, username='guest', password='guest')
@@ -129,7 +129,7 @@ Here is the complete example from the code above:
 
 ```python
 import json
-from rabbitmq import RabbitMQ, MessagePayload
+from rctiplus_rabbitmq_python_sdk import RabbitMQ, MessagePayload
 
 # Create payload class handler that implement `MessagePayload`
 class JSONPayload(MessagePayload):
