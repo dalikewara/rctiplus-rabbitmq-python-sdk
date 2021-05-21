@@ -1,0 +1,15 @@
+version: "3.2"
+services:
+  python_rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'python_rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ./rabbitmq_volume/data/:/var/lib/rabbitmq/
+        - ./rabbitmq_volume/log/:/var/log/rabbitmq
+    networks:
+        - python_rabbitmq
+networks:
+  python_rabbitmq:
