@@ -5,7 +5,7 @@ A library from RCTI+ to handle RabbitMQ tasks (connect, send, receive, etc) in P
 # Requirements
 
 - Python >=3.7.3
-- Pika >=1.2.0
+- Pika ==1.2.0
 
 # Installation
 
