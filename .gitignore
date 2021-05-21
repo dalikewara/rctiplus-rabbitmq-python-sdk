@@ -15,6 +15,7 @@ rabbitmq_volume/data
 rabbitmq_volume/log
 build
 *.egg-info
+.pypirc
 
 
 # Node artifact files
