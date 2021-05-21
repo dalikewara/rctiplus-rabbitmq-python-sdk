@@ -166,6 +166,7 @@ class JSONPayload(MessagePayload):
 conn = RabbitMQ()
 conn.connect(host='localhost', port=5672, username='guest', password='guest')
 
+# Example sender app
 # Send payload to queue
 payload = JSONPayload('John', 'Doe')
 print('payload:', payload)
