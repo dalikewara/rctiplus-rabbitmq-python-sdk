@@ -1,21 +1,24 @@
 import pika
+from rctiplus_rabbitmq_python_sdk import MessagePayload
 from typing import Callable
 
 class RabbitMQ:
 
-    def __init__(self, durable: bool = False, auto_ack: bool = True) -> None:
+    def __init__(self, durable: bool = False, auto_ack: bool = True, auto_delete: bool = False) -> None:
         """Python RabbitMQ library
 
         Args:
             durable (bool, optional): Durable mode, prevent from losing messages if RabbitMQ server stops or restarts. Defaults to False
-            auto_ack (bool, optional): Auto acknowledgements, remove messages immadiatelly after being received. Defaults to True.
+            auto_ack (bool, optional): Auto acknowledgements, remove messages immadiatelly after being received. Defaults to True
+            auto_delete (bool, optional): Delete created queue after consumer cancels or disconnects. Defaults to False
         """
         self.durable = durable
         self.delivery_mode = None
         if self.durable:
             self.delivery_mode = 2 # Make messages persistence if durable mode active
         self.auto_ack = auto_ack
-        self.conn = None
+        self.auto_delete = auto_delete
+        self.connection = None
         self.channel = None
 
     def connect(self, host: str, port: int, username: str, password: str) -> None:
@@ -28,30 +31,31 @@ class RabbitMQ:
             password (str): RabbitMQ password
         """
         credentials = pika.PlainCredentials(username, password)
-        self.conn = pika.BlockingConnection(
+        self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 host=host,
                 port=port,
                 credentials=credentials,
             )
         )
-        self.channel = self.conn.channel()
+        self.channel = self.connection.channel()
 
     def disconnect(self) -> None:
         """Disconnect RabbitMQ connection
         """
-        self.conn.close()
+        self.connection.close()
 
-    def send(self, queue: str, body: 'MessagePayload') -> None:
+    def send(self, queue: str, body: MessagePayload, exchange: str = '') -> None:
         """Send message/body to RabbitMQ channel queue
 
         Args:
             queue (str): Queue name
             body (MessagePayload): Message/body payload
+            exchange (str, optional): Exchange name. Defaults to ''
         """
-        self.channel.queue_declare(queue=queue, durable=self.durable)
+        self.channel.queue_declare(queue=queue, durable=self.durable, auto_delete=self.auto_delete)
         self.channel.basic_publish(
-            exchange='', routing_key=queue, body=str(body), properties=pika.BasicProperties(
+            exchange=exchange, routing_key=queue, body=str(body), properties=pika.BasicProperties(
                 delivery_mode=self.delivery_mode
             ))
 
@@ -69,7 +73,7 @@ class RabbitMQ:
             queue (str): Queue name
             callback (Callable[ [ pika.adapters.blocking_connection.BlockingChannel, pika.spec.Basic.Deliver, pika.spec.BasicProperties, bytes ], None ]): Callback to be called after receiving a message
         """
-        self.channel.queue_declare(queue=queue, durable=self.durable)
+        self.channel.queue_declare(queue=queue, durable=self.durable, auto_delete=self.auto_delete)
         self.channel.basic_consume(
             queue=queue, on_message_callback=callback, auto_ack=self.auto_ack)
         self.channel.start_consuming()
@@ -81,6 +85,14 @@ class RabbitMQ:
             queue (str): Queue name to be deleted
         """
         self.channel.queue_delete(queue=queue)
+    
+    def delete_exchange(self, exchange: str) -> None:
+        """Delete channel exchange
+
+        Args:
+            exchange (str): Exchange name to be deleted
+        """
+        self.channel.exchange_delete(exchange=exchange)
 
     def commit_ack(self, ch: pika.adapters.blocking_connection.BlockingChannel,
                     method: pika.spec.Basic.Deliver) -> None:
@@ -92,28 +104,3 @@ class RabbitMQ:
             method (pika.spec.Basic.Deliver): `method` argument from the callback
         """
         ch.basic_ack(delivery_tag=method.delivery_tag)
-
-
-class MessagePayload:
-    """Python RabbitMQ message payload
-    """
-    
-    @classmethod
-    def from_str(cls, message: str) -> 'MessagePayload':
-        """Generate data from specified string payload message format
-
-        Raises:
-            NotImplementedError: Raise an error if not implemented
-        """
-        raise NotImplementedError()
-
-    def __str__(self) -> str:
-        """Convert specified data format to string payload message
-
-        Raises:
-            NotImplementedError: Raise an error if not implemented
-
-        Returns:
-            str: String payload message
-        """
-        raise NotImplementedError()

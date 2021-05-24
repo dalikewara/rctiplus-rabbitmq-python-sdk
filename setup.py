@@ -4,10 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 requirements = [
     'pika==1.2.0'
+    'aio-pika==6.8.0'
 ]
 setuptools.setup(
     name="rctiplus-rabbitmq-python-sdk",
-    version="0.0.1",
+    version="1.0.0",
     license="GPLv3",
     author="RCTI+",
     author_email="rctiplus.webmaster@gmail.com",

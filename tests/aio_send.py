@@ -1,5 +1,6 @@
 import json
-from rctiplus_rabbitmq_python_sdk import RabbitMQ, MessagePayload
+import asyncio
+from rctiplus_rabbitmq_python_sdk import AIORabbitMQ, MessagePayload
 
 
 # Create payload class handler that implement `MessagePayload`
@@ -21,7 +22,7 @@ class JSONPayload(MessagePayload):
             'firstname': self.firstname,
             'lastname': self.lastname
         })
-
+    
     @classmethod
     def from_str(cls, message: str) -> 'JSONPayload':
         """Generate data from JSON string payload message
@@ -33,17 +34,21 @@ class JSONPayload(MessagePayload):
         return cls(firstname=payload['firstname'], lastname=payload['lastname'])
 
 
-# Connect to RabbitMQ
-conn = RabbitMQ()
-conn.connect(host='localhost', port=5672, username='guest', password='guest')
+# Main function
+async def main(loop):
 
-# Create a callback to be executed immadiately after recieved a message
-def callback(ch, method, properties, body):
-    print("[x] Received %r" % body)
+    # Connect to RabbitMQ
+    conn = AIORabbitMQ(loop)
+    await conn.connect(host='localhost', port=5672, username='guest', password='guest')
     
-    # Generate data from string payload message
-    data = JSONPayload.from_str(body)
-    print(f'data: firstname={data.firstname}, lastname={data.lastname}')
+    async with conn.connection:
+        # Send payload to queue
+        payload = JSONPayload('John', 'Doe')
+        print('payload:', payload)
+        await conn.send('test', payload)
 
-# Receive & listen messages from queue channel
-conn.receive('test', callback)
+
+# Event loop
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main(loop))
+loop.close()
