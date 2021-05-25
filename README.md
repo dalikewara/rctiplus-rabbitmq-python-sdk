@@ -250,10 +250,9 @@ await conn.connect(host='localhost', port=5672, username='guest', password='gues
 ## Async sending message
 
 ```python
-async with conn.connection:
-    payload = JSONPayload('John', 'Doe')
-    print('payload:', payload)
-    await conn.send('test', payload)
+payload = JSONPayload('John', 'Doe')
+print('payload:', payload)
+await conn.send('test', payload)
 ```
 
 ## Async receiving message
