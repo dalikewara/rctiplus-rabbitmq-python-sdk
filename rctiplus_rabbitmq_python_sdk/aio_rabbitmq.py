@@ -60,6 +60,7 @@ class AIORabbitMQ:
             body (MessagePayload): Message/body payload
             exchange (str, optional): Exchange name. Defaults to ''
         """
+        await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
         if exchange == '':
             await self.channel.default_exchange.publish(
                 aio_pika.Message(
@@ -69,7 +70,6 @@ class AIORabbitMQ:
                 queue,
             )
         else:
-            await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
             exchange = await self.channel.declare_exchange(exchange, auto_delete=self.auto_delete)
             await exchange.publish(
                 aio_pika.Message(
