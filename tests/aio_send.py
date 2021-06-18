@@ -45,7 +45,7 @@ async def main(loop):
         # Send payload to queue
         payload = JSONPayload('John', 'Doe')
         print('payload:', payload)
-        await conn.send('test', payload)
+        await conn.send('test222', payload)
 
 
 # Event loop

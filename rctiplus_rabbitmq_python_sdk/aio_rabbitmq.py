@@ -60,7 +60,10 @@ class AIORabbitMQ:
             body (MessagePayload): Message/body payload
             exchange (str, optional): Exchange name. Defaults to ''
         """
-        await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
+        try:
+            await self.channel.get_queue(queue, ensure=True)
+        except:
+            await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
         if exchange == '':
             await self.channel.default_exchange.publish(
                 aio_pika.Message(
@@ -70,14 +73,17 @@ class AIORabbitMQ:
                 queue,
             )
         else:
-            exchange = await self.channel.declare_exchange(exchange, auto_delete=self.auto_delete)
-            await exchange.publish(
-                aio_pika.Message(
-                    bytes(str(body), 'utf-8'),
-                    delivery_mode=self.delivery_mode,
-                ),
-                queue,
-            )
+            try:
+                await self.channel.get_exchange(exchange)
+            except:
+                exchange = await self.channel.declare_exchange(exchange, auto_delete=self.auto_delete)
+                await exchange.publish(
+                    aio_pika.Message(
+                        bytes(str(body), 'utf-8'),
+                        delivery_mode=self.delivery_mode,
+                    ),
+                    queue,
+                )
 
     async def receive(self, queue: str, callback: Callable[
         [
@@ -90,7 +96,10 @@ class AIORabbitMQ:
             queue (str): Queue name
             callback (Callable[ [ aio_pika.IncomingMessage ], None ]): Callback to be called after receiving a message
         """
-        queue = await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
+        try:
+            queue = await self.channel.get_queue(queue, ensure=True)
+        except:
+            queue = await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
         await queue.consume(callback, no_ack=self.auto_ack)
 
     async def delete_queue(self, queue: str) -> None:
