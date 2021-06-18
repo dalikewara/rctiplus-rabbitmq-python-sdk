@@ -8,7 +8,7 @@ requirements = [
 ]
 setuptools.setup(
     name="rctiplus-rabbitmq-python-sdk",
-    version="1.1.0",
+    version="1.1.1",
     license="GPLv3",
     author="RCTI+",
     author_email="rctiplus.webmaster@gmail.com",

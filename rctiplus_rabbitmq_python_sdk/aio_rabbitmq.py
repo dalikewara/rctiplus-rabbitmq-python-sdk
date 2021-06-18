@@ -74,16 +74,16 @@ class AIORabbitMQ:
             )
         else:
             try:
-                await self.channel.get_exchange(exchange)
+                exchange = await self.channel.get_exchange(exchange)
             except:
                 exchange = await self.channel.declare_exchange(exchange, auto_delete=self.auto_delete)
-                await exchange.publish(
-                    aio_pika.Message(
-                        bytes(str(body), 'utf-8'),
-                        delivery_mode=self.delivery_mode,
-                    ),
-                    queue,
-                )
+            await exchange.publish(
+                aio_pika.Message(
+                    bytes(str(body), 'utf-8'),
+                    delivery_mode=self.delivery_mode,
+                ),
+                queue,
+            )
 
     async def receive(self, queue: str, callback: Callable[
         [
