@@ -1,2 +1,3 @@
 pika==1.2.0
 aio-pika==6.8.0
+requests==2.25.1

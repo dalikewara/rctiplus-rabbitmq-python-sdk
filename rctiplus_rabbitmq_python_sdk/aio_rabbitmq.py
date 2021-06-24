@@ -1,3 +1,4 @@
+import requests
 import urllib.parse
 import asyncio
 import aio_pika
@@ -51,6 +52,28 @@ class AIORabbitMQ:
         """Disconnect RabbitMQ connection
         """
         await self.connection.close()
+    
+    async def get_list_queues(self, user: str = 'guest',
+                              password: str = 'guest',
+                              host: str = 'localhost',
+                              port: int = 15672,
+                              virtual_host: str = None) -> list:
+        """Get list all queues using RabbitMQ Management API
+
+        Args:
+            user (str, optional): RabbitMQ user. Defaults to 'guest'.
+            password (str, optional): RabbitMQ password. Defaults to 'guest'.
+            host (str, optional): RabbitMQ host. Defaults to 'localhost'.
+            port (int, optional): RabbitMQ port. Defaults to 15672.
+            virtual_host (str, optional): RabbitMQ virtual host. Defaults to None.
+
+        Returns:
+            list: List of queues
+        """
+        url = 'http://%s:%s/api/queues/%s' % (host, port, virtual_host or '')
+        response = requests.get(url, auth=(user, password))
+        queues = [q['name'] for q in response.json()]
+        return queues
 
     async def send(self, queue: str, body: MessagePayload, exchange: str = '') -> None:
         """Send message/body to RabbitMQ channel queue
@@ -63,6 +86,7 @@ class AIORabbitMQ:
         try:
             await self.channel.get_queue(queue, ensure=True)
         except:
+            await self.channel.reopen()
             await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
         if exchange == '':
             await self.channel.default_exchange.publish(
@@ -76,6 +100,7 @@ class AIORabbitMQ:
             try:
                 exchange = await self.channel.get_exchange(exchange)
             except:
+                await self.channel.reopen()
                 exchange = await self.channel.declare_exchange(exchange, auto_delete=self.auto_delete)
             await exchange.publish(
                 aio_pika.Message(
@@ -99,6 +124,7 @@ class AIORabbitMQ:
         try:
             queue = await self.channel.get_queue(queue, ensure=True)
         except:
+            await self.channel.reopen()
             queue = await self.channel.declare_queue(queue, durable=self.durable, auto_delete=self.auto_delete)
         await queue.consume(callback, no_ack=self.auto_ack)
 

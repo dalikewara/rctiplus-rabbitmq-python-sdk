@@ -13,3 +13,5 @@ if __name__ == '__main__':
         import tests.aio_send
     if test_name == 'aio_receive':
         import tests.aio_receive
+    if test_name == 'aio_get_queues':
+        import tests.aio_get_queues
