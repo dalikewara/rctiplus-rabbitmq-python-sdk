@@ -7,6 +7,7 @@ A library from RCTI+ to handle RabbitMQ tasks (connect, send, receive, etc) in P
 - Python >=3.7.3
 - Pika ==1.2.0
 - Aio-pika ==6.8.0
+- Requests >=2.25.1
 
 # Installation
 
